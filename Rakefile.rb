@@ -9,6 +9,18 @@ def projects
   end
 end
 
+desc 'showd an project overview'
+task :overview do
+  sh 'gem install terminal-table'
+  require 'terminal-table'
+  rows = []
+  projects.each do |p,v|
+    rows << [p, v.include?(:SPEC) ? '*' : ' ', v.include?(:ACCEPT) ? '*' : ' ']
+  end
+  table = Terminal::Table.new(:title => 'Project Overview', :headings => ['Project', 'Unit-Tests', 'Acceptance-Tests'], :rows => rows)
+  puts table
+end
+
 desc 'test all projects'
 task :test_all => [:overview] do
   projects.each do |p,v|
