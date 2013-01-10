@@ -17,18 +17,18 @@ task :overview do
   projects.each do |p,v|
     rows << [p, v.include?(:SPEC) ? '*' : ' ', v.include?(:ACCEPT) ? '*' : ' ']
   end
-  table = Terminal::Table.new(:title => 'Project Overview', :headings => ['Project', 'Unit-Tests', 'Acceptance-Tests'], :rows => rows)
+  table = Terminal::Table.new(:title => 'Project Overview', :headings => ['Project', 'Unit-Tests', 'Acceptance-Tests'], :rows => rows, :style => {:width => 80})
   puts table
 end
 
 desc 'test all projects'
 task :test_all => [:overview] do
   projects.each do |p,v|
-    cd "../#{p}" do
-      if v.include?(:SPEC) || v.include?(:ACCEPT)
-        puts '--------------------------------------------------------------------------------'
-        puts "- working on '#{p}' in '#{Dir.pwd}'"
-        puts '--------------------------------------------------------------------------------'
+    if v.include?(:SPEC) || v.include?(:ACCEPT)
+      puts "-" * 80
+      puts "- working on '#{p}' in '#{File.absolute_path(File.join(Dir.pwd, '..', p))}'"
+      puts "-" * 80
+      cd "../#{p}" do
         sh 'rvm --force gemset empty'
         sh 'gem install rspec bundler builder grit'
         sh 'rake spec' if v.include?(:SPEC)
