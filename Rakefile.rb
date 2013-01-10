@@ -25,10 +25,15 @@ desc 'test all projects'
 task :test_all => [:overview] do
   projects.each do |p,v|
     cd "../#{p}" do
-      sh 'rvm --force gemset empty'
-      sh 'gem install rspec bundler builder grit'
-      sh 'rake spec' if v.include?(:SPEC)
-      sh 'rake prepare_accept accept' if v.include?(:ACCEPT)
+      if v.include?(:SPEC) || v.include?(:ACCEPT)
+        puts '--------------------------------------------------------------------------------'
+        puts "- working on '#{p}' in '#{Dir.pwd}'"
+        puts '--------------------------------------------------------------------------------'
+        sh 'rvm --force gemset empty'
+        sh 'gem install rspec bundler builder grit'
+        sh 'rake spec' if v.include?(:SPEC)
+        sh 'rake prepare_accept accept' if v.include?(:ACCEPT)
+      end
     end
   end
 end
