@@ -1,12 +1,16 @@
+
 def projects
-  s = [:SPEC]
-  a = [:ACCEPT]
-  sa = s + a
-  {'cxxproject' => sa, 'cxx' => sa, 'cxxproject_tomake' => sa}
+  Dir.new('..').entries.delete_if{|i|i.index('.')}.sort.inject({}) do |memo,p|
+    stages = []
+    stages << :SPEC if File.directory?("../#{p}/spec")
+    stages << :ACCEPT if File.directory?("../#{p}/accept") 
+    memo[p] = stages
+    memo
+  end
 end
 
 desc 'test all projects'
-task :test_all do
+task :test_all => [:overview] do
   projects.each do |p,v|
     cd "../#{p}" do
       sh 'rvm --force gemset empty'
