@@ -1,4 +1,10 @@
 
+def quiet_cd(dir)
+  cd(dir, :verbose => false) do
+    yield
+  end
+end
+
 def projects
   Dir.new('..').entries.delete_if{|i|i.index('.')}.sort.inject({}) do |memo,p|
     stages = []
@@ -28,7 +34,7 @@ task :test_all => [:overview] do
       puts "-" * 80
       puts "- working on '#{p}' in '#{File.absolute_path(File.join(Dir.pwd, '..', p))}'"
       puts "-" * 80
-      cd "../#{p}" do
+      quiet_cd "../#{p}" do
         sh 'rvm --force gemset empty'
         sh 'gem install rspec bundler builder grit'
         sh 'rake spec' if tests.include?(:SPEC)
@@ -42,7 +48,7 @@ def projects_with_configured_github
   projects.keys.delete_if do |p|
     res = true
     begin
-      cd("../#{p}", :verbose => false) do
+      quiet_cd "../#{p}" do
         s = `git remote`
         res = s.index('github') == nil
       end
@@ -56,8 +62,9 @@ end
 desc "upload #{projects_with_configured_github.join(', ')} to github default:master"
 task :to_github do
   projects_with_configured_github.each do |p|
+    puts "pushing on #{p}"
     begin
-      cd "../#{p}" do
+      quiet_cd "../#{p}" do
         sh 'git push github default:master'
       end
     rescue
