@@ -9,7 +9,7 @@ def projects
   Dir.new('..').entries.delete_if{|i|i.index('.')}.sort.inject({}) do |memo,p|
     stages = []
     stages << :SPEC if File.directory?("../#{p}/spec")
-    stages << :ACCEPT if File.directory?("../#{p}/accept") 
+    stages << :ACCEPT if File.directory?("../#{p}/accept")
     memo[p] = stages
     memo
   end
