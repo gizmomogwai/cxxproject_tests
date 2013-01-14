@@ -5,11 +5,30 @@ def quiet_cd(dir)
   end
 end
 
+def has_git(dir)
+  return File.exists?(File.join(dir, '.git'))
+end
+
+def has_github(dir)
+  res = false
+  begin
+    quiet_cd dir do
+      s = `git remote`
+      res = s.index('github') != nil
+    end
+  rescue => e
+    res = false
+  end
+  res
+end
+
 def projects
   Dir.new('..').entries.delete_if{|i|i.index('.')}.sort.inject({}) do |memo,p|
     stages = []
     stages << :SPEC if File.directory?("../#{p}/spec")
     stages << :ACCEPT if File.directory?("../#{p}/accept")
+    stages << :GITHUB if has_github("../#{p}")
+    stages << :GIT if has_git("../#{p}")
     memo[p] = stages
     memo
   end
@@ -21,9 +40,9 @@ task :overview do
   require 'terminal-table'
   rows = []
   projects.each do |p,tests|
-    rows << [p, tests.include?(:SPEC) ? '*' : ' ', tests.include?(:ACCEPT) ? '*' : ' ']
+    rows << [p, tests.include?(:SPEC) ? '*' : ' ', tests.include?(:ACCEPT) ? '*' : ' ', tests.include?(:GIT) ? '*' : ' ', tests.include?(:GITHUB) ? '*' : ' ']
   end
-  table = Terminal::Table.new(:title => 'Project Overview', :headings => ['Project', 'Unit-Tests', 'Acceptance-Tests'], :rows => rows, :style => {:width => 80})
+  table = Terminal::Table.new(:title => 'Project Overview', :headings => ['Project', 'Unit-Tests', 'Acceptance-Tests', 'Git', 'Github'], :rows => rows, :style => {:width => 80})
   puts table
 end
 
@@ -46,16 +65,7 @@ end
 
 def projects_with_configured_github
   projects.keys.delete_if do |p|
-    res = true
-    begin
-      quiet_cd "../#{p}" do
-        s = `git remote`
-        res = s.index('github') == nil
-      end
-    rescue => e
-      res = true
-    end
-    res
+    has_github("../#{p}") == false
   end
 end
 
