@@ -64,9 +64,7 @@ task :test_all => [:overview] do
 end
 
 def projects_with_configured_github
-  projects.keys.delete_if do |p|
-    has_github("../#{p}") == false
-  end
+  projects.keys.select {|p|has_github("../#{p}")}
 end
 
 desc "upload #{projects_with_configured_github.join(', ')} to github default:master"
