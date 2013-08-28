@@ -37,6 +37,7 @@ end
 desc 'showd an project overview'
 task :overview do
   sh 'gem install terminal-table'
+  
   require 'terminal-table'
   rows = []
   projects.each do |p,tests|
