@@ -55,7 +55,7 @@ task :test_all => [:overview] do
       puts "- working on '#{p}' in '#{File.absolute_path(File.join(Dir.pwd, '..', p))}'"
       puts "-" * 80
       quiet_cd "../#{p}" do
-        sh 'rvm --force gemset empty'
+        sh 'rvm gemset --force empty'
         sh 'gem install rspec bundler builder grit'
         sh 'rake spec' if tests.include?(:SPEC)
         sh 'rake prepare_accept accept' if tests.include?(:ACCEPT)
